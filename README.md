@@ -11,3 +11,6 @@ swagger url: http://localhost:8000/swagger/index.html
 | -- | ---------------- | ------------ |
 | 1  | POSTGRES_URL     | URL          |
 | 2  | EXTERNAL_API     | URL          |
+
+
+В файле logs.log содержаться логи

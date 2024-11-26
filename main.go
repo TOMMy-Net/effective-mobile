@@ -46,7 +46,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/songs", service.SongHandlers()).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch)
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler) // http://localhost:8000/swagger/index.html
 
 	router.Use(middleware.ScanTrafic(l))
 
