@@ -1,1 +1,1 @@
-DROP TABLE "musics"
+DROP TABLE IF EXISTS "musics"

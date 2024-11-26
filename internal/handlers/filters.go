@@ -18,6 +18,23 @@ var (
 	pageSize = 10
 )
 
+// @Summary Get song with filter
+// @Tags get
+// @Description get song from library with filters (eq:, neq:, lt:, gt:), eq: for default
+// @ID get-song
+// @Accept json
+// @Produce json
+// @Param id query int false "song id"
+// @Param song query string false "song title"
+// @Param music_group query string false "song group"
+// @Param link query string false "song link"
+// @Param text query string false "song text"
+// @Param release_date query string false "song created at"
+// @Param page query string true "page of the data"
+// @Success 200 {object} models.Song
+// @Failure 400 {object} tools.Error
+// @Failure 500 {object} tools.Error
+// @Router /songs [get]
 func (s *Service) GetFilterSongHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filter := []filters.Filter{}

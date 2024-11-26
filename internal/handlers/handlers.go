@@ -25,6 +25,7 @@ var (
 	ErrDeleteData = errors.New("data cannot be deleted")
 	ErrBadMethod  = errors.New("method not allowed")
 	ErrTypeID     = errors.New("id type not correct")
+	ErrData       = errors.New("data not correct, (0000-00-00)")
 )
 
 const (
@@ -70,21 +71,24 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 			return
 		}
 
-		if err := tools.ValidateFields(&song, "Song", "Group"); err != nil {
+		if err := tools.ValidateFields(&song, "Song", "Group", "ReleaseDate"); err != nil {
 			tools.SetJSON(400, tools.Error{
 				Msg: ErrValid.Error(),
 			}, w)
 			return
 		}
 
-		if song.ReleaseDate != "" {
-			t, err := time.Parse(time.DateOnly, song.ReleaseDate)
-			if err == nil {
-				song.ReleaseDate = t.Format("2006-01-02")
-			}
+		t, err := time.Parse(time.DateOnly, song.ReleaseDate)
+		if err == nil {
+			song.ReleaseDate = t.Format("2006-01-02")
+		} else {
+			tools.SetJSON(400, tools.Error{
+				Msg: ErrData.Error(),
+			}, w)
+			return
 		}
 
-		err := s.Storage.AddSong(r.Context(), &song)
+		err = s.Storage.AddSong(r.Context(), &song)
 		if err != nil {
 			tools.SetJSON(500, tools.Error{
 				Msg: ErrSetData.Error(),
@@ -95,11 +99,11 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 		api, err := tools.GetMusicInfo(song.Song, song.Group)
 		if err != nil {
 			s.Log.WithFields(logrus.Fields{
-				"song": song.Song,
+				"song":  song.Song,
 				"group": song.Group,
 				"error": err,
-				
 			}).Debug("api error")
+
 			tools.SetJSON(502, tools.Error{
 				Msg: err.Error(),
 			}, w)
@@ -109,9 +113,8 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 	}
 }
 
-
 // @Summary Delete song
-// @Tags Delete
+// @Tags delete
 // @Description delete song from library
 // @ID delete-song
 // @Accept json
@@ -145,7 +148,6 @@ func (s *Service) DeleteSongHandler() http.HandlerFunc {
 	}
 }
 
-
 // @Summary Edit song
 // @Tags edit
 // @Description edit song at library
@@ -153,6 +155,7 @@ func (s *Service) DeleteSongHandler() http.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param input body models.Song true "song info"
+// @Param id query int true "song id"
 // @Success 200 {object} tools.OK
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
@@ -177,6 +180,13 @@ func (s *Service) EditSongHandler() http.HandlerFunc {
 			return
 		}
 
+		if err := tools.ValidateFields(&song, "Song", "Group", "ReleaseDate"); err != nil {
+			tools.SetJSON(400, tools.Error{
+				Msg: ErrValid.Error(),
+			}, w)
+			return
+		}
+
 		err = s.Storage.EditSong(r.Context(), &song)
 		if err != nil {
 			tools.SetJSON(500, tools.Error{
@@ -185,7 +195,7 @@ func (s *Service) EditSongHandler() http.HandlerFunc {
 			return
 		}
 		tools.SetJSON(200, tools.OK{Msg: EditOK}, w)
-		
+
 	}
 }
 

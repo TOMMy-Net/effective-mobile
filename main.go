@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/TOMMy-Net/effective-mobile/docs"
 	"github.com/TOMMy-Net/effective-mobile/internal/handlers"
 	"github.com/TOMMy-Net/effective-mobile/internal/middleware"
 	"github.com/TOMMy-Net/effective-mobile/internal/storage/db"
@@ -13,7 +14,6 @@ import (
 	"github.com/TOMMy-Net/effective-mobile/tools/logger"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
-
 )
 
 // @title Music Library API
@@ -46,7 +46,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/songs", service.SongHandlers()).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch)
-	router.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	router.Use(middleware.ScanTrafic(l))
 
