@@ -1,0 +1,19 @@
+meta {
+  name: add
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/songs
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "song":"Лесник",
+    "group": "Король и Шут",
+    "releaseDate": "2007-02-01"
+  }
+}

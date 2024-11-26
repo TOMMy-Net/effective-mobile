@@ -1,0 +1,23 @@
+meta {
+  name: edit
+  type: http
+  seq: 4
+}
+
+patch {
+  url: http://localhost:8000/songs?id=13
+  body: json
+  auth: none
+}
+
+query {
+  id: 13
+}
+
+body:json {
+  {
+    "song":"ad",
+    "group": "хуй",
+    "releaseDate": "2007-02-10"
+  }
+}

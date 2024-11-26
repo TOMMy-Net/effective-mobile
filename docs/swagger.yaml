@@ -1,0 +1,134 @@
+basePath: /
+definitions:
+  models.Song:
+    properties:
+      group:
+        minLength: 1
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      releaseDate:
+        type: string
+      song:
+        minLength: 1
+        type: string
+      text:
+        type: string
+    required:
+    - group
+    - song
+    type: object
+  tools.Error:
+    properties:
+      error:
+        type: string
+    type: object
+  tools.OK:
+    properties:
+      status:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: API for managing music library
+  title: Music Library API
+  version: "1.0"
+paths:
+  /songs:
+    delete:
+      consumes:
+      - application/json
+      description: delete song from library
+      operationId: delete-song
+      parameters:
+      - description: song id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tools.OK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tools.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tools.Error'
+      summary: Delete song
+      tags:
+      - Delete
+    patch:
+      consumes:
+      - application/json
+      description: edit song at library
+      operationId: edit-song
+      parameters:
+      - description: song info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tools.OK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tools.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tools.Error'
+      summary: Edit song
+      tags:
+      - edit
+    post:
+      consumes:
+      - application/json
+      description: add song to library
+      operationId: add-song
+      parameters:
+      - description: song info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tools.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tools.Error'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/tools.Error'
+      summary: Add song
+      tags:
+      - add
+swagger: "2.0"
