@@ -39,7 +39,7 @@ info:
   title: Music Library API
   version: "1.0"
 paths:
-  /songs:
+  /api/v1/songs:
     delete:
       consumes:
       - application/json
@@ -192,4 +192,39 @@ paths:
       summary: Add song
       tags:
       - add
+  /api/v1/songs/{id}/text:
+    get:
+      consumes:
+      - application/json
+      description: get verse text of song from the library
+      operationId: getText-song
+      parameters:
+      - description: verse pagination
+        in: query
+        name: verse
+        required: true
+        type: integer
+      - description: song id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Song'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tools.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tools.Error'
+      summary: Get verse text of song
+      tags:
+      - get
 swagger: "2.0"

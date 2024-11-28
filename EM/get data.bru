@@ -5,15 +5,15 @@ meta {
 }
 
 get {
-  url: http://localhost:8000/songs?page=1&music_group=eq:Король
+  url: http://localhost:8000/api/v1/songs?page=1&music_group=eq:хуй&id=79
   body: none
   auth: none
 }
 
 query {
   page: 1
-  music_group: eq:Король
+  music_group: eq:хуй
+  id: 79
   ~release_date: 2007-02-10
   ~song: eq:Лесник
-  ~id: gt:30
 }

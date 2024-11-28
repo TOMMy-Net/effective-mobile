@@ -15,6 +15,7 @@ func ScanTrafic(log *logrus.Logger) mux.MiddlewareFunc {
 			log.WithFields(logrus.Fields{
 				"method": r.Method,
 				"url":    r.URL,
+				"addr":   r.RemoteAddr,
 				"time":   time.Now().Format(time.RFC3339),
 			}).Info("Request received")
 

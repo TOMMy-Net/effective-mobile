@@ -34,7 +34,7 @@ var (
 // @Success 200 {object} models.Song
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
-// @Router /songs [get]
+// @Router /api/v1/songs [get]
 func (s *Service) GetFilterSongHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filter := []filters.Filter{}

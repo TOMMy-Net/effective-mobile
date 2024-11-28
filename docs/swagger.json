@@ -9,7 +9,7 @@
     "host": "localhost:8000",
     "basePath": "/",
     "paths": {
-        "/songs": {
+        "/api/v1/songs": {
             "get": {
                 "description": "get song from library with filters (eq:, neq:, lt:, gt:), eq: for default",
                 "consumes": [
@@ -219,6 +219,58 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/tools.OK"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/tools.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/tools.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/songs/{id}/text": {
+            "get": {
+                "description": "get verse text of song from the library",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "get"
+                ],
+                "summary": "Get verse text of song",
+                "operationId": "getText-song",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "verse pagination",
+                        "name": "verse",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "song id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Song"
                         }
                     },
                     "400": {

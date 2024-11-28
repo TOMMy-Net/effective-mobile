@@ -23,6 +23,12 @@ func (s *Storage) EditSong(ctx context.Context, m *models.Song) error {
 												text = :text, 
 												link = :link, 
 												release_date = :release_date WHERE id = :id`, m)
-										
+
 	return err
+}
+
+func (s *Storage) GetSongText(ctx context.Context, songID int) (string, error) {
+	var text string
+	err := s.DB.GetContext(ctx, &text, `SELECT text FROM musics WHERE id = $1`, songID)
+	return text, err
 }

@@ -42,19 +42,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
+
 	l := logger.InitLogger(file)
 
 	service := handlers.NewService() // create service instance
 	service.Storage = store
 	service.Log = l
 
+	// ---- routeres
 	router := mux.NewRouter()
-	router.HandleFunc("/songs", service.SongHandlers()).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch)
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler) // http://localhost:8000/swagger/index.html
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler) // http://host:port/swagger/index.html
 
+	api := router.PathPrefix("/api/v1").Subrouter()
+	api.HandleFunc("/songs", service.SongHandlers()).Methods(http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPatch)
+	api.HandleFunc("/songs/{id}/text", service.GetSongTextHandler()).Methods(http.MethodGet)
+	
 	router.Use(middleware.ScanTrafic(l))
+	// ---- end
 
-	srv := newServer(router)
+	srv := newServer(router) // http server
 
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
@@ -70,6 +77,7 @@ func main() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err.Error())
 		}
+		log.Println("server Shutdown")
 		wg.Done()
 	}()
 
@@ -82,9 +90,9 @@ func main() {
 	wg.Wait()
 }
 
-func newServer(r *mux.Router) http.Server {
+func newServer(r http.Handler) http.Server {
 	if os.Getenv("PORT") == "" {
-		log.Fatal("no server port ")
+		log.Fatal("no server port")
 	}
 
 	return http.Server{

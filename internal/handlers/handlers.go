@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"github.com/TOMMy-Net/effective-mobile/internal/storage/db"
 	"github.com/TOMMy-Net/effective-mobile/models"
 	"github.com/TOMMy-Net/effective-mobile/tools"
+	"github.com/TOMMy-Net/effective-mobile/tools/verse"
+	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,6 +29,9 @@ var (
 	ErrBadMethod  = errors.New("method not allowed")
 	ErrTypeID     = errors.New("id type not correct")
 	ErrData       = errors.New("data not correct, (0000-00-00)")
+	ErrWithQuery  = errors.New("error with data in query")
+	ErrGetData    = errors.New("data cannot be get")
+	ErrNoID       = errors.New("no such id in the database")
 )
 
 const (
@@ -59,7 +65,7 @@ func (s *Service) SongHandlers() http.HandlerFunc {
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
 // @Failure 502 {object} tools.Error
-// @Router /songs [post]
+// @Router /api/v1/songs [post]
 func (s *Service) AddSongHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var song models.Song
@@ -123,7 +129,7 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 // @Success 200 {object} tools.OK
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
-// @Router /songs [delete]
+// @Router /api/v1/songs [delete]
 func (s *Service) DeleteSongHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var id = r.URL.Query().Get("id")
@@ -159,7 +165,7 @@ func (s *Service) DeleteSongHandler() http.HandlerFunc {
 // @Success 200 {object} tools.OK
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
-// @Router /songs [patch]
+// @Router /api/v1/songs [patch]
 func (s *Service) EditSongHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var song models.Song
@@ -196,6 +202,59 @@ func (s *Service) EditSongHandler() http.HandlerFunc {
 		}
 		tools.SetJSON(200, tools.OK{Msg: EditOK}, w)
 
+	}
+}
+
+// @Summary Get verse text of song
+// @Tags get
+// @Description get verse text of song from the library
+// @ID getText-song
+// @Accept json
+// @Produce json
+// @Param verse query int true "verse pagination"
+// @Param id path int true "song id"
+// @Success 200 {object} models.Song
+// @Failure 400 {object} tools.Error
+// @Failure 500 {object} tools.Error
+// @Router /api/v1/songs/{id}/text [get]
+func (s *Service) GetSongTextHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var id int
+		var page int // куплет песни
+
+		id, errID := strconv.Atoi(mux.Vars(r)["id"])
+		page, errPage := strconv.Atoi(r.URL.Query().Get("verse"))
+		if errID != nil || errPage != nil {
+			tools.SetJSON(400, tools.Error{
+				Msg: ErrWithQuery.Error(),
+			}, w)
+			return
+		}
+
+		text, err := s.Storage.GetSongText(r.Context(), id)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				tools.SetJSON(400, tools.Error{
+					Msg: ErrNoID.Error(),
+				}, w)
+				return
+			} else {
+				tools.SetJSON(500, tools.Error{
+					Msg: ErrGetData.Error(),
+				}, w)
+				return
+			}
+		}
+
+		textWithVerse, err := verse.TextPaginate(text, page)
+		if err != nil {
+			tools.SetJSON(400, tools.Error{
+				Msg: verse.ErrNoVerse.Error(),
+			}, w)
+			return
+		}
+
+		tools.SetJSON(200, models.Song{Text: textWithVerse, ID: id}, w)
 	}
 }
 
