@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	_ "github.com/TOMMy-Net/effective-mobile/docs"
@@ -50,12 +54,43 @@ func main() {
 
 	router.Use(middleware.ScanTrafic(l))
 
-	srv := http.Server{
-		Addr:         ":8000",
-		Handler:      router,
+	srv := newServer(router)
+
+	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		<-c
+		cancel()
+	}()
+
+	wg.Add(1)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err.Error())
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		<-ctx.Done()
+		if err := srv.Shutdown(context.Background()); err != nil {
+			log.Printf("HTTP server Shutdown: %v", err)
+		}
+	}()
+	wg.Wait()
+}
+
+func newServer(r *mux.Router) http.Server {
+	if os.Getenv("PORT") == "" {
+		log.Fatal("no server port ")
+	}
+
+	return http.Server{
+		Addr:         os.Getenv("PORT"),
+		Handler:      r,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
-	srv.ListenAndServe()
 }
