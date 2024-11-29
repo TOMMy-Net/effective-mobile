@@ -249,7 +249,7 @@ func (s *Service) GetSongTextHandler() http.HandlerFunc {
 		textWithVerse, err := verse.TextPaginate(text, page)
 		if err != nil {
 			tools.SetJSON(400, tools.Error{
-				Msg: verse.ErrNoVerse.Error(),
+				Msg: err.Error(),
 			}, w)
 			return
 		}
