@@ -37,6 +37,7 @@ var (
 const (
 	DeleteOK = "data be deleted"
 	EditOK   = "data be edited"
+	AddOK    = "data be add"
 )
 
 func (s *Service) SongHandlers() http.HandlerFunc {
@@ -61,7 +62,7 @@ func (s *Service) SongHandlers() http.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param input body models.Song true "song info"
-// @Success 200 {object} models.Song
+// @Success 200 {object} tools.OK
 // @Failure 400 {object} tools.Error
 // @Failure 500 {object} tools.Error
 // @Failure 502 {object} tools.Error
@@ -77,27 +78,9 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 			return
 		}
 
-		if err := tools.ValidateFields(&song, "Song", "Group", "ReleaseDate"); err != nil {
+		if err := tools.ValidateFields(&song, "Song", "Group"); err != nil {
 			tools.SetJSON(400, tools.Error{
 				Msg: ErrValid.Error(),
-			}, w)
-			return
-		}
-
-		t, err := time.Parse(time.DateOnly, song.ReleaseDate)
-		if err == nil {
-			song.ReleaseDate = t.Format("2006-01-02")
-		} else {
-			tools.SetJSON(400, tools.Error{
-				Msg: ErrData.Error(),
-			}, w)
-			return
-		}
-
-		err = s.Storage.AddSong(r.Context(), &song)
-		if err != nil {
-			tools.SetJSON(500, tools.Error{
-				Msg: ErrSetData.Error(),
 			}, w)
 			return
 		}
@@ -115,7 +98,25 @@ func (s *Service) AddSongHandler() http.HandlerFunc {
 			}, w)
 			return
 		}
-		tools.SetJSON(200, api, w)
+		song.Text = api.Text
+		song.Link = api.Link
+
+		t, err := time.Parse("02.01.2006", api.ReleaseDate)
+		if err == nil {
+			song.ReleaseDate = t.Format("2006-01-02")
+		} else {
+			song.ReleaseDate = "0001-01-01"
+		}
+
+		err = s.Storage.AddSong(r.Context(), &song)
+		if err != nil {
+			tools.SetJSON(500, tools.Error{
+				Msg: ErrSetData.Error(),
+			}, w)
+			return
+		}
+
+		tools.SetJSON(200, tools.OK{Msg: AddOK}, w)
 	}
 }
 
@@ -177,7 +178,6 @@ func (s *Service) EditSongHandler() http.HandlerFunc {
 			}, w)
 			return
 		}
-		song.ID = idInt
 
 		if err := json.NewDecoder(r.Body).Decode(&song); err != nil {
 			tools.SetJSON(400, tools.Error{
@@ -185,14 +185,22 @@ func (s *Service) EditSongHandler() http.HandlerFunc {
 			}, w)
 			return
 		}
+		song.ID = idInt
 
-		if err := tools.ValidateFields(&song, "Song", "Group", "ReleaseDate"); err != nil {
+		if err := tools.ValidateFields(&song, "Song", "Group"); err != nil {
 			tools.SetJSON(400, tools.Error{
 				Msg: ErrValid.Error(),
 			}, w)
 			return
 		}
 
+		t, err := time.Parse("2006-01-02", song.ReleaseDate)
+		if err == nil {
+			song.ReleaseDate = t.Format("2006-01-02")
+		} else {
+			song.ReleaseDate = "0001-01-01"
+		}
+	
 		err = s.Storage.EditSong(r.Context(), &song)
 		if err != nil {
 			tools.SetJSON(500, tools.Error{

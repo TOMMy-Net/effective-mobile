@@ -7,5 +7,5 @@ type Song struct {
 	Group       string `json:"group" db:"music_group" validate:"required,min=1"`
 	Text        string `json:"text" db:"text"`
 	Link        string `json:"link" db:"link"`
-	ReleaseDate string `json:"releaseDate" db:"release_date" validate:"required,min=1"`
+	ReleaseDate string `json:"releaseDate" db:"release_date"`
 }

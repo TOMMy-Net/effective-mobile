@@ -14,7 +14,8 @@ var (
 	ErrNotPag          = errors.New("pagination is required")
 	ErrGetFilteredData = errors.New("error with get data")
 )
-var (
+
+const (
 	pageSize = 10
 )
 

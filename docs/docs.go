@@ -123,7 +123,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Song"
+                            "$ref": "#/definitions/tools.OK"
                         }
                     },
                     "400": {
@@ -300,7 +300,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "group",
-                "releaseDate",
                 "song"
             ],
             "properties": {
@@ -315,8 +314,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "releaseDate": {
-                    "type": "string",
-                    "minLength": 1
+                    "type": "string"
                 },
                 "song": {
                     "type": "string",
